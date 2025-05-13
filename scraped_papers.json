@@ -1,20 +1,44 @@
 [
     {
-        "title": "Lecture Notes: Optimization for Machine Learning",
-        "authors": "\nElad Hazan\n",
-        "summary": "Lecture notes on optimization for machine learning, derived from a course at\nPrinceton University and tutorials given in MLSS, Buenos Aires, as well as\nSimons Foundation, Berkeley.",
-        "link": "http://arxiv.org/abs/1909.03550v1"
+        "title": "The Rise of Quantum Internet Computing",
+        "authors": "Seng W. Loke",
+        "summary": "This article highlights quantum Internet computing as referring to\ndistributed quantum computing over the quantum Internet, analogous to\n(classical) Internet computing involving (classical) distributed computing over\nthe (classical) Internet. Relevant to quantum Internet computing would be areas\nof study such as quantum protocols for distributed nodes using quantum\ninformation for computations, quantum cloud computing, delegated verifiable\nblind or private computing, non-local gates, and distributed quantum\napplications, over Internet-scale distances.",
+        "link": "http://arxiv.org/abs/2208.00733v1",
+        "citation": "Seng W. Loke (2022). The Rise of Quantum Internet Computing. arXiv preprint arXiv:2208.00733v1.",
+        "keywords": [
+            "quantum",
+            "computing",
+            "internet",
+            "distributed",
+            "over"
+        ]
     },
     {
-        "title": "An Optimal Control View of Adversarial Machine Learning",
-        "authors": "\nXiaojin Zhu\n",
-        "summary": "I describe an optimal control view of adversarial machine learning, where the\ndynamical system is the machine learner, the input are adversarial actions, and\nthe control costs are defined by the adversary's goals to do harm and be hard\nto detect. This view encompasses many types of adversarial machine learning,\nincluding test-item attacks, training-data poisoning, and adversarial reward\nshaping. The view encourages adversarial machine learning researcher to utilize\nadvances in control theory and reinforcement learning.",
-        "link": "http://arxiv.org/abs/1811.04422v1"
+        "title": "Unconventional Quantum Computing Devices",
+        "authors": "Seth Lloyd",
+        "summary": "This paper investigates a variety of unconventional quantum computation\ndevices, including fermionic quantum computers and computers that exploit\nnonlinear quantum mechanics. It is shown that unconventional quantum computing\ndevices can in principle compute some quantities more rapidly than\n`conventional' quantum computers.",
+        "link": "http://arxiv.org/abs/quant-ph/0003151v1",
+        "citation": "Seth Lloyd (2000). Unconventional Quantum Computing Devices. arXiv preprint arXiv:0003151v1.",
+        "keywords": [
+            "quantum",
+            "unconventional",
+            "devices",
+            "computers",
+            "computing"
+        ]
     },
     {
-        "title": "Minimax deviation strategies for machine learning and recognition with\n  short learning samples",
-        "authors": "\nMichail Schlesinger\n, \nEvgeniy Vodolazskiy\n",
-        "summary": "The article is devoted to the problem of small learning samples in machine\nlearning. The flaws of maximum likelihood learning and minimax learning are\nlooked into and the concept of minimax deviation learning is introduced that is\nfree of those flaws.",
-        "link": "http://arxiv.org/abs/1707.04849v1"
+        "title": "Geometrical perspective on quantum states and quantum computation",
+        "authors": "Zeqian Chen",
+        "summary": "We interpret quantum computing as a geometric evolution process by\nreformulating finite quantum systems via Connes' noncommutative geometry. In\nthis formulation, quantum states are represented as noncommutative connections,\nwhile gauge transformations on the connections play a role of unitary quantum\noperations. Thereby, a geometrical model for quantum computation is presented,\nwhich is equivalent to the quantum circuit model. This result shows a geometric\nway of realizing quantum computing and as such, provides an alternative\nproposal of building a quantum computer.",
+        "link": "http://arxiv.org/abs/1311.4939v1",
+        "citation": "Zeqian Chen (2013). Geometrical perspective on quantum states and quantum computation. arXiv preprint arXiv:1311.4939v1.",
+        "keywords": [
+            "quantum",
+            "geometrical",
+            "states",
+            "computation",
+            "computing"
+        ]
     }
 ]
