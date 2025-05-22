@@ -1,10 +1,10 @@
 import streamlit as st
 from crewai import Crew, Agent, Task
 from crewai.tools import BaseTool
+from crewai import BaseLLM
 import requests
 from bs4 import BeautifulSoup
 import json
-from crewai import BaseLLM
 import re
 from collections import Counter
 
@@ -12,8 +12,8 @@ from collections import Counter
 
 
 class NullLLM(BaseLLM):
-    def __init__(self, **kwargs):
-        super().__init__(model="null-llm", **kwargs)
+    def _init_(self, **kwargs):
+        super()._init_(model="null-llm", **kwargs)
 
     def call(self, prompt, **kwargs):
         return "LLM disabled: no response."
@@ -23,12 +23,20 @@ class ScrapeArxivTool(BaseTool):
     name: str = "Scrape arXiv papers"
     description: str = "Scrapes arXiv for research papers."
 
-    def _run(self, query="quantum computing", max_results=3):
+    def _run(
+        self,
+        query="quantum computing",
+        max_results=3,
+        sort_by="relevance",
+        sort_direction="Descending",
+    ):
         base_url = "https://export.arxiv.org/api/query"
+        fetch_limit = max_results * 3  # Overfetch to allow local filtering
+
         params = {
             "search_query": f"all:{query}",
             "start": 0,
-            "max_results": max_results,
+            "max_results": fetch_limit,
             "sortBy": "relevance",
             "sortOrder": "descending",
         }
@@ -44,17 +52,14 @@ class ScrapeArxivTool(BaseTool):
 
         for entry in soup.find_all("entry"):
             title = entry.title.text.strip()
+            summary = entry.summary.text.strip()
             authors = ", ".join(
                 [author.find("name").text for author in entry.find_all("author")]
             )
-            summary = entry.summary.text.strip()
             link = entry.id.text
-            published = entry.published.text[:4] if entry.published else "n.d."
+            published = entry.published.text if entry.published else "n.d."
 
-            # Generate citation string
-            citation = f"{authors} ({published}). {title}. arXiv preprint arXiv:{link.split('/')[-1]}."
-
-            # Basic keyword extraction
+            citation = f"{authors} ({published[:4]}). {title}. arXiv preprint arXiv:{link.split('/')[-1]}."
             keywords = self.extract_keywords(title + " " + summary)
 
             papers.append(
@@ -63,15 +68,19 @@ class ScrapeArxivTool(BaseTool):
                     "authors": authors,
                     "summary": summary,
                     "link": link,
+                    "published": published,
                     "citation": citation,
                     "keywords": keywords,
                 }
             )
 
-        return papers
+        # Sort by publication date
+        reverse = sort_direction.lower() == "descending"
+        papers.sort(key=lambda x: x["published"], reverse=reverse)
+
+        return papers[:max_results]
 
     def extract_keywords(self, text, top_n=5):
-        # Very basic tokenizer and cleaner
         words = re.findall(r"\b[a-z]{3,}\b", text.lower())
         stopwords = set(
             [
@@ -141,19 +150,29 @@ st.title("AI Research Assistant: arXiv Paper Scraper")
 
 query = st.text_input("Enter research topic:", "quantum computing")
 max_results = st.slider("Number of papers:", 1, 10, 3)
+sort_order = st.selectbox("Sort papers by:", options=["Relevance", "Latest"], index=1)
+sort_direction = st.selectbox(
+    "Date sort direction (if 'Latest'):", ["Descending", "Ascending"], index=0
+)
+sort_by = "relevance"  # Always fetch by relevance
 
 if st.button("Get Papers"):
     with st.spinner("Scraping papers..."):
-        # Instantiate Tools
+        # Instantiate tools
         scraper_tool = ScrapeArxivTool()
         saver_tool = SaveDataTool()
-
         papers_container = {}
-        # define agents
 
-        # Define Agents
+        # Define agent logic
         def scraper_logic(_: str = ""):
-            papers = scraper_tool.run(query=query, max_results=max_results)
+            papers = scraper_tool.run(
+                query=query,
+                max_results=max_results,
+                sort_by=sort_by,
+                sort_direction=sort_direction
+                if sort_order == "Latest"
+                else "Descending",
+            )
             papers_container["papers"] = papers
             return (
                 f"Scraped {len(papers)} papers." if isinstance(papers, list) else papers
@@ -165,6 +184,7 @@ if st.button("Get Papers"):
                 return "No papers to save."
             return saver_tool.run(papers)
 
+        # Create agents
         scraper_agent = Agent(
             role="Scraper",
             goal="Scrape research papers from arXiv",
@@ -180,10 +200,10 @@ if st.button("Get Papers"):
             llm=NullLLM(),
             verbose=False,
         )
-       # ya ya m
-        # Assign functions to tasks
+
+        # Assign tasks
         scraper_task = Task(
-            description=f"Scrape {max_results} papers on '{query}' from arXiv.",
+            description=f"Scrape {max_results} papers on '{query}' from arXiv and sort by {sort_order} ({sort_direction}).",
             agent=scraper_agent,
             expected_output="A list of scraped papers.",
             callback=scraper_logic,
@@ -196,19 +216,20 @@ if st.button("Get Papers"):
             callback=saver_logic,
         )
 
-        # Run Crew
+        # Run CrewAI
         crew = Crew(
             agents=[scraper_agent, storage_agent], tasks=[scraper_task, storage_task]
         )
         crew.kickoff()
 
-        # Display Results
+        # Display results
         papers = papers_container.get("papers", [])
         if isinstance(papers, list) and papers:
             st.success(f"Found {len(papers)} papers!")
             for paper in papers:
                 st.subheader(paper["title"])
                 st.text(f"Authors: {paper['authors']}")
+                st.text(f"Published: {paper['published']}")
                 st.text(f"Summary: {paper['summary'][:500]}...")
                 st.text(f"Citation: {paper['citation']}")
                 st.text(f"Keywords: {', '.join(paper['keywords'])}")
